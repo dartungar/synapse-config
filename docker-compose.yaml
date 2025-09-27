@@ -1,6 +1,16 @@
 version: '3.8'
 
 services:
+  synapse-generate-config:
+    image: matrixdotorg/synapse:latest
+    volumes:
+      - synapse_data:/data
+    environment:
+      - SYNAPSE_SERVER_NAME=${SYNAPSE_SERVER_NAME}
+      - SYNAPSE_REPORT_STATS=no
+    command: ["generate"]
+    restart: "no"
+
   synapse:
     image: matrixdotorg/synapse:latest
     restart: unless-stopped
@@ -8,31 +18,10 @@ services:
       - "8009:8008"
     volumes:
       - synapse_data:/data
-    environment:
-      - SYNAPSE_SERVER_NAME=${SYNAPSE_SERVER_NAME}
-      - SYNAPSE_REPORT_STATS=no
     depends_on:
+      - synapse-generate-config
       - postgres
       - redis
-    # Generate config on first run
-    command: >
-      sh -c "
-      if [ ! -f /data/homeserver.yaml ]; then
-        echo 'Generating initial config...'
-        python -m synapse.app.homeserver \
-          --server-name=$${SYNAPSE_SERVER_NAME} \
-          --config-path=/data/homeserver.yaml \
-          --generate-config \
-          --data-directory=/data \
-          --report-stats=no
-        echo 'Config generated. Please restart the container.'
-        sleep 30
-        exit 0
-      else
-        echo 'Config exists, starting Synapse...'
-        python -m synapse.app.homeserver -c /data/homeserver.yaml
-      fi
-      "
 
   postgres:
     image: postgres:15
@@ -63,22 +52,6 @@ services:
       - EXTERNAL_IP=${VPS_PUBLIC_IP}
       - REALM=${SYNAPSE_SERVER_NAME}
       - SHARED_SECRET=${TURN_SHARED_SECRET}
-    command: >
-      sh -c "
-      cat > /etc/coturn/turnserver.conf << EOF
-      listening-port=3478
-      external-ip=$$EXTERNAL_IP
-      realm=$$REALM
-      use-auth-secret
-      static-auth-secret=$$SHARED_SECRET
-      verbose
-      no-multicast-peers
-      no-cli
-      no-tlsv1
-      no-tlsv1_1
-      EOF
-      && coturn -c /etc/coturn/turnserver.conf
-      "
 
 volumes:
   synapse_data:
