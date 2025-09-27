@@ -38,7 +38,6 @@ services:
     ports:
       - "3478:3478/tcp"
       - "3478:3478/udp"
-      - "49152-65535:49152-65535/udp"
     volumes:
       - coturn_data:/etc/coturn
     environment:
@@ -58,8 +57,6 @@ services:
       no-cli
       no-tlsv1
       no-tlsv1_1
-      min-port=49152
-      max-port=65535
       EOF
       && coturn -c /etc/coturn/turnserver.conf
       "
