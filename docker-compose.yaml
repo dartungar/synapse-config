@@ -5,7 +5,7 @@ services:
     image: matrixdotorg/synapse:latest
     restart: unless-stopped
     ports:
-      - "8008:8008"
+      - "8009:8008"  # Changed to 8009 externally
     volumes:
       - synapse_data:/data
     environment:
