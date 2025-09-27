@@ -1,16 +1,6 @@
 version: '3.8'
 
 services:
-  synapse-generate-config:
-    image: matrixdotorg/synapse:latest
-    volumes:
-      - synapse_data:/data
-    environment:
-      - SYNAPSE_SERVER_NAME=${SYNAPSE_SERVER_NAME}
-      - SYNAPSE_REPORT_STATS=no
-    command: ["generate"]
-    restart: "no"
-
   synapse:
     image: matrixdotorg/synapse:latest
     restart: unless-stopped
@@ -18,8 +8,9 @@ services:
       - "8009:8008"
     volumes:
       - synapse_data:/data
+      - ./homeserver.yaml:/data/homeserver.yaml:ro
+      - ./log.config:/data/log.config:ro
     depends_on:
-      - synapse-generate-config
       - postgres
       - redis
 
@@ -47,14 +38,11 @@ services:
       - "3478:3478/tcp"
       - "3478:3478/udp"
     volumes:
-      - coturn_data:/etc/coturn
+      - ./turnserver.conf:/etc/coturn/turnserver.conf:ro
     environment:
       - EXTERNAL_IP=${VPS_PUBLIC_IP}
-      - REALM=${SYNAPSE_SERVER_NAME}
-      - SHARED_SECRET=${TURN_SHARED_SECRET}
 
 volumes:
   synapse_data:
   postgres_data:
   redis_data:
-  coturn_data:
