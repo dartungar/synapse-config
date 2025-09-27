@@ -5,7 +5,7 @@ services:
     image: matrixdotorg/synapse:latest
     restart: unless-stopped
     ports:
-      - "8009:8008"  # Changed to 8009 externally
+      - "8009:8008"
     volumes:
       - synapse_data:/data
     environment:
@@ -14,6 +14,25 @@ services:
     depends_on:
       - postgres
       - redis
+    # Generate config on first run
+    command: >
+      sh -c "
+      if [ ! -f /data/homeserver.yaml ]; then
+        echo 'Generating initial config...'
+        python -m synapse.app.homeserver \
+          --server-name=$${SYNAPSE_SERVER_NAME} \
+          --config-path=/data/homeserver.yaml \
+          --generate-config \
+          --data-directory=/data \
+          --report-stats=no
+        echo 'Config generated. Please restart the container.'
+        sleep 30
+        exit 0
+      else
+        echo 'Config exists, starting Synapse...'
+        python -m synapse.app.homeserver -c /data/homeserver.yaml
+      fi
+      "
 
   postgres:
     image: postgres:15
