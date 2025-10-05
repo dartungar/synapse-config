@@ -13,6 +13,11 @@ services:
     depends_on:
       - postgres
       - redis
+    labels:
+      - homepage.group=Services
+      - homepage.name=Synapse
+      - homepage.icon=mdi-video-wireless-outline
+      - homepage.href=https://matrix.dartungar.com/
 
   postgres:
     image: postgres:15
