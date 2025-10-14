@@ -14,8 +14,8 @@ services:
       - postgres
       - redis
     labels:
-      - homepage.group=Services
-      - homepage.name=Synapse
+      - homepage.group=Synapse
+      - homepage.name=Synapse App
       - homepage.icon=mdi-video-wireless-outline
       - homepage.href=https://matrix.dartungar.com/
 
@@ -29,12 +29,24 @@ services:
       - POSTGRES_INITDB_ARGS=--encoding=UTF-8 --lc-collate=C --lc-ctype=C
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    labels:
+      - homepage.group=Synapse
+      - homepage.name=Synapse DB
+      - homepage.icon=mdi-video-wireless-outline
+      - homepage.href=https://matrix.dartungar.com/
+
 
   redis:
     image: redis:7-alpine
     restart: unless-stopped
     volumes:
       - redis_data:/data
+    labels:
+      - homepage.group=Synapse
+      - homepage.name=Synapse Redis
+      - homepage.icon=mdi-video-wireless-outline
+      - homepage.href=https://matrix.dartungar.com/
+
 
   coturn:
     image: coturn/coturn:latest
@@ -46,6 +58,12 @@ services:
       - ./turnserver.conf:/etc/coturn/turnserver.conf:ro
     environment:
       - EXTERNAL_IP=${VPS_PUBLIC_IP}
+    labels:
+      - homepage.group=Synapse
+      - homepage.name=Synapse Coturn
+      - homepage.icon=mdi-video-wireless-outline
+      - homepage.href=https://matrix.dartungar.com/
+
 
 volumes:
   synapse_data:
